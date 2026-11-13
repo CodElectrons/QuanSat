@@ -1,0 +1,859 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>QuanSat</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+/* Layout: spec-sheet grid with hairline rules. The one bold move is the interface bus in the platform
+   section, a vertical line with a node per subsystem, taken from the proposal's block diagram.
+   Deliberately a single dark look, matching the logo's cyan on black. */
+:root {
+  color-scheme: dark;
+  --bg: #04090d;
+  --bg-2: #09131a;
+  --line: #14303c;
+  --line-2: #21495a;
+  --fg: #dbe9ef;
+  --fg-2: #93aab5;
+  --accent: #4db8d8;
+  --accent-deep: #2f8fae;
+  --accent-ink: #04090d;
+  --font-display: "Chakra Petch", "Bahnschrift", "Eurostile", system-ui, sans-serif;
+  --font-body: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+html { scroll-behavior: smooth; scroll-padding-top: calc(76px + env(safe-area-inset-top, 0px)); }
+body {
+  background: var(--bg);
+  color: var(--fg);
+  font: 400 16px/1.65 var(--font-body);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0 0 auto;
+  height: env(safe-area-inset-top, 0px);
+  background: var(--bg);
+  z-index: 10;
+}
+h1, h2, h3, h4, p, ul, ol, dl, dd, figure { margin: 0; }
+a { color: inherit; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+.num { font-variant-numeric: tabular-nums; }
+
+.wrap {
+  width: 100%;
+  max-width: 1120px;
+  margin-inline: auto;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+
+/* Header */
+.site-header {
+  position: sticky;
+  top: env(safe-area-inset-top, 0px);
+  z-index: 20;
+  background: var(--bg);
+  border-bottom: 1px solid var(--line);
+}
+.nav-row { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding-block: 10px; }
+.brand { display: inline-flex; align-items: center; gap: 10px; text-decoration: none; font: 700 22px/1 var(--font-display); letter-spacing: 0.02em; }
+.brand img { height: 28px; width: auto; }
+.brand .q { color: var(--accent-deep); }
+.brand .s { color: var(--accent); }
+.nav { display: flex; gap: 2px; overflow-x: auto; scrollbar-width: none; min-width: 0; }
+.nav::-webkit-scrollbar { display: none; }
+.nav a { padding: 8px 12px; color: var(--fg-2); text-decoration: none; font: 500 13px/1 var(--font-display); letter-spacing: 0.1em; text-transform: uppercase; white-space: nowrap; }
+.nav a:hover { color: var(--fg); }
+
+/* Hero */
+.hero {
+  border-bottom: 1px solid var(--line);
+  background-image: radial-gradient(var(--line) 1px, transparent 1px);
+  background-size: 28px 28px;
+  padding-top: clamp(40px, 7vw, 88px);
+}
+.hero-grid { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr); gap: clamp(24px, 5vw, 64px); align-items: center; }
+.eyebrow { font: 500 12px/1.4 var(--font-mono); letter-spacing: 0.16em; text-transform: uppercase; color: var(--accent); }
+h1 { font: 700 clamp(34px, 5.4vw, 60px)/1.04 var(--font-display); letter-spacing: -0.01em; text-wrap: balance; margin-top: 16px; }
+.lede { font-size: clamp(17px, 2vw, 19px); color: var(--fg-2); max-width: 54ch; margin-top: 20px; }
+.cta-row { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 32px; }
+.btn { display: inline-flex; align-items: center; padding: 13px 20px; border: 1px solid var(--line-2); border-radius: 2px; font: 600 14px/1 var(--font-display); letter-spacing: 0.08em; text-transform: uppercase; text-decoration: none; color: var(--fg); }
+.btn:hover { border-color: var(--accent); }
+.btn.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+.btn.primary:hover { background: var(--fg); border-color: var(--fg); }
+
+.hero-art { display: grid; place-items: center; max-width: 520px; width: 100%; margin-inline: auto; }
+.hero-art > * { grid-area: 1 / 1; }
+.hero-art svg { width: 100%; height: auto; display: block; }
+.hero-art img { width: 70%; height: auto; display: block; }
+.svg-label { font: 500 14px var(--font-mono); letter-spacing: 0.16em; fill: var(--fg-2); }
+
+.spec-strip {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 1px;
+  background: var(--line);
+  border: 1px solid var(--line);
+  margin-top: clamp(36px, 6vw, 64px);
+  margin-bottom: -1px;
+}
+.spec { background: var(--bg); padding: 18px 18px 20px; min-width: 0; }
+.spec dt { font: 500 11px/1.4 var(--font-mono); letter-spacing: 0.14em; text-transform: uppercase; color: var(--fg-2); }
+.spec dd { font: 600 clamp(18px, 2.2vw, 24px)/1.2 var(--font-display); margin-top: 8px; }
+.spec dd small { display: block; font: 400 13px/1.4 var(--font-body); color: var(--fg-2); margin-top: 4px; }
+
+/* Sections */
+.section { padding-block: clamp(56px, 8vw, 104px); border-bottom: 1px solid var(--line); }
+.sec-head { display: grid; grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr); gap: clamp(24px, 5vw, 64px); margin-bottom: clamp(32px, 5vw, 56px); align-items: start; }
+.kicker { font: 500 12px/1.4 var(--font-mono); letter-spacing: 0.16em; text-transform: uppercase; color: var(--accent); margin-bottom: 14px; }
+h2 { font: 600 clamp(28px, 4vw, 44px)/1.1 var(--font-display); text-wrap: balance; }
+.prose { display: grid; gap: 16px; max-width: 62ch; color: var(--fg-2); }
+.prose p:first-child { color: var(--fg); font-size: 18px; }
+
+/* Platform explorer */
+.explorer { display: grid; grid-template-columns: minmax(0, 290px) minmax(0, 1fr); gap: clamp(24px, 4vw, 48px); align-items: start; }
+.bus-label { font: 500 11px/1.5 var(--font-mono); letter-spacing: 0.14em; text-transform: uppercase; color: var(--fg-2); margin-bottom: 12px; }
+.bus { position: relative; display: flex; flex-direction: column; padding-left: 30px; }
+.bus::before { content: ""; position: absolute; left: 7px; top: 14px; bottom: 14px; width: 2px; background: var(--line-2); }
+.bus button {
+  position: relative; display: flex; align-items: baseline; justify-content: space-between; gap: 12px;
+  width: 100%; text-align: left; background: none; border: 0; cursor: pointer;
+  color: var(--fg-2); font: 600 17px/1.3 var(--font-display); padding: 11px 8px 11px 0;
+}
+.bus button .code { font: 400 11px var(--font-mono); letter-spacing: 0.1em; color: var(--fg-2); opacity: 0.8; }
+.bus button::before { content: ""; position: absolute; left: -29px; top: 50%; width: 14px; height: 14px; margin-top: -7px; border-radius: 50%; background: var(--bg); border: 2px solid var(--line-2); }
+.bus button::after { content: ""; position: absolute; left: -15px; top: 50%; width: 15px; height: 2px; margin-top: -1px; background: var(--line-2); }
+.bus button:hover { color: var(--fg); }
+.bus button[aria-selected="true"] { color: var(--fg); }
+.bus button[aria-selected="true"]::before { background: var(--accent); border-color: var(--accent); }
+.bus button[aria-selected="true"]::after { background: var(--accent); }
+
+.panel { border: 1px solid var(--line); background: var(--bg-2); padding: clamp(20px, 3vw, 36px); min-width: 0; }
+.panel h3 { font: 600 clamp(24px, 3vw, 32px)/1.15 var(--font-display); }
+.panel .role { color: var(--fg-2); max-width: 58ch; margin-top: 8px; }
+.cols { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 200px), 1fr)); gap: 24px 28px; margin-top: 28px; }
+.cols h4 { font: 500 11px/1.4 var(--font-mono); letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent); margin-bottom: 12px; }
+.cols ul { list-style: none; padding: 0; display: grid; gap: 9px; }
+.cols li { position: relative; padding-left: 18px; font-size: 15px; line-height: 1.5; }
+.cols li::before { content: ""; position: absolute; left: 0; top: 0.75em; width: 9px; height: 1px; background: var(--accent-deep); }
+.meta { margin-top: 28px; padding-top: 16px; border-top: 1px solid var(--line); display: flex; flex-wrap: wrap; gap: 6px 28px; font: 400 13px/1.5 var(--font-mono); color: var(--fg-2); }
+.meta b { color: var(--fg); font-weight: 500; }
+
+/* Edge AI */
+.ai-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: clamp(28px, 5vw, 64px); align-items: start; }
+.sub-h { font: 500 11px/1.4 var(--font-mono); letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent); margin-bottom: 18px; }
+.flow { list-style: none; padding: 0; counter-reset: step; display: grid; }
+.flow li { position: relative; counter-increment: step; padding: 0 0 22px 52px; min-width: 0; }
+.flow li::before { content: counter(step); position: absolute; left: 0; top: 0; width: 34px; height: 34px; display: grid; place-items: center; border: 1px solid var(--line-2); background: var(--bg); font: 500 14px var(--font-mono); color: var(--accent); }
+.flow li:not(:last-child)::after { content: ""; position: absolute; left: 16px; top: 38px; bottom: 4px; width: 1px; background: var(--line-2); }
+.flow li:last-child { padding-bottom: 0; }
+.flow strong { display: block; font: 600 17px/1.3 var(--font-display); }
+.flow span { display: block; color: var(--fg-2); font-size: 15px; margin-top: 4px; }
+
+.facts { display: grid; gap: 22px; }
+.fact h4 { font: 600 17px/1.3 var(--font-display); margin-bottom: 6px; }
+.fact p { color: var(--fg-2); font-size: 15px; }
+.callout { border: 1px dashed var(--line-2); padding: 18px 20px; }
+.callout .sub-h { margin-bottom: 8px; }
+.callout p { font-size: 15px; color: var(--fg-2); }
+.callout p b { color: var(--fg); font-weight: 600; }
+
+.table-wrap { overflow-x: auto; margin-top: clamp(32px, 5vw, 56px); border: 1px solid var(--line); }
+table { width: 100%; border-collapse: collapse; font-size: 15px; }
+caption { text-align: left; padding: 14px 16px; font: 500 11px/1.4 var(--font-mono); letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent); border-bottom: 1px solid var(--line); }
+th, td { text-align: left; vertical-align: top; padding: 14px 16px; border-bottom: 1px solid var(--line); }
+tr:last-child td { border-bottom: 0; }
+th { font: 500 11px/1.4 var(--font-mono); letter-spacing: 0.12em; text-transform: uppercase; color: var(--fg-2); }
+td:first-child { font: 600 16px/1.35 var(--font-display); min-width: 170px; }
+td:nth-child(2), td:nth-child(3) { color: var(--fg-2); }
+.tag { display: inline-block; margin-top: 8px; padding: 3px 8px; border: 1px solid var(--accent-deep); color: var(--accent); font: 500 11px/1.3 var(--font-mono); letter-spacing: 0.06em; text-transform: uppercase; }
+.tag.alt { border-color: var(--line-2); color: var(--fg-2); }
+
+/* Orbit */
+.orbit-grid { display: grid; grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr); gap: clamp(28px, 5vw, 64px); align-items: start; }
+.params { display: grid; border-top: 1px solid var(--line); }
+.params div { display: flex; justify-content: space-between; gap: 16px; padding: 12px 0; border-bottom: 1px solid var(--line); }
+.params dt { color: var(--fg-2); font-size: 15px; }
+.params dd { font: 500 14px/1.5 var(--font-mono); text-align: right; }
+.results { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1px; background: var(--line); border: 1px solid var(--line); }
+.result { background: var(--bg); padding: 20px 18px; min-width: 0; }
+.result .v { font: 600 clamp(28px, 3.4vw, 40px)/1 var(--font-display); }
+.result .v small { font-size: 0.5em; font-weight: 500; color: var(--fg-2); margin-left: 4px; }
+.result .l { font-size: 14px; color: var(--fg-2); margin-top: 10px; line-height: 1.45; }
+
+.chart { margin-top: clamp(32px, 5vw, 56px); border: 1px solid var(--line); padding: clamp(18px, 3vw, 32px); background: var(--bg-2); }
+.chart h3 { font: 600 20px/1.3 var(--font-display); }
+.chart .sub { color: var(--fg-2); font-size: 14px; margin-top: 4px; }
+.bars { margin-top: 24px; display: grid; gap: 16px; }
+.brow { display: grid; grid-template-columns: 150px minmax(0, 1fr); gap: 16px; align-items: center; }
+.brow .lbl { font: 500 13px/1.3 var(--font-mono); letter-spacing: 0.04em; color: var(--fg-2); }
+.track { position: relative; height: 30px; display: flex; align-items: center; }
+.seg { height: 100%; display: flex; align-items: center; padding-inline: 10px; font: 500 13px var(--font-mono); white-space: nowrap; color: var(--accent-ink); min-width: 0; }
+.seg.orbit { background: var(--line-2); color: var(--fg); }
+.seg.eclipse { background: var(--accent-deep); }
+.seg.pass { background: var(--accent); padding: 0; }
+.seg.pass-range { background: repeating-linear-gradient(135deg, var(--accent) 0 3px, transparent 3px 6px); padding: 0; }
+.out { margin-left: 10px; font: 500 13px var(--font-mono); color: var(--fg); white-space: nowrap; }
+.axis { position: relative; height: 26px; margin-left: 166px; border-top: 1px solid var(--line-2); margin-top: 6px; }
+.axis span { position: absolute; top: 6px; transform: translateX(-50%); font: 400 11px var(--font-mono); color: var(--fg-2); }
+.axis i { position: absolute; top: 0; width: 1px; height: 5px; background: var(--line-2); }
+.drives { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px; margin-top: 28px; padding-top: 24px; border-top: 1px solid var(--line); }
+.drives h4 { font: 600 17px/1.3 var(--font-display); margin-bottom: 6px; }
+.drives p { color: var(--fg-2); font-size: 15px; }
+.note { color: var(--fg-2); font-size: 14px; margin-top: 18px; max-width: 80ch; }
+
+/* Budget */
+.budget-grid { display: grid; grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr); gap: clamp(28px, 5vw, 64px); align-items: start; }
+.total { font: 700 clamp(44px, 7vw, 80px)/1 var(--font-display); letter-spacing: -0.02em; }
+.total small { font: 500 clamp(16px, 2vw, 20px) var(--font-mono); color: var(--accent); letter-spacing: 0.06em; margin-left: 8px; }
+.budget-grid .lead p { color: var(--fg-2); margin-top: 16px; max-width: 44ch; }
+.blist { list-style: none; padding: 0; border-top: 1px solid var(--line); }
+.blist li { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 4px 20px; padding: 16px 0 18px; border-bottom: 1px solid var(--line); }
+.blist .n { font: 600 17px/1.3 var(--font-display); }
+.blist .i { grid-column: 1; color: var(--fg-2); font-size: 14px; line-height: 1.5; }
+.blist .a { grid-column: 2; grid-row: 1 / span 2; text-align: right; font: 500 14px/1.5 var(--font-mono); white-space: nowrap; }
+.blist .a small { display: block; color: var(--fg-2); font-size: 12px; }
+.blist .bar { grid-column: 1 / -1; height: 6px; background: var(--line); margin-top: 8px; }
+.blist .bar i { display: block; height: 100%; background: var(--accent); }
+
+/* Team */
+.team-grid { display: grid; grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr); gap: clamp(28px, 5vw, 64px); align-items: start; }
+.sup .lbl { font: 500 11px/1.4 var(--font-mono); letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent); }
+.sup .nm { font: 600 clamp(22px, 2.6vw, 28px)/1.2 var(--font-display); margin-top: 10px; }
+.sup p { color: var(--fg-2); margin-top: 14px; font-size: 15px; max-width: 40ch; }
+.members { list-style: none; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 250px), 1fr)); column-gap: 28px; border-top: 1px solid var(--line); }
+.members li { padding: 13px 0; border-bottom: 1px solid var(--line); font-size: 16px; }
+
+/* Contact + footer */
+.contact { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: clamp(28px, 5vw, 64px); align-items: start; }
+.contact p { color: var(--fg-2); max-width: 52ch; }
+.addr { border: 1px solid var(--line); background: var(--bg-2); padding: 6px clamp(16px, 2.5vw, 24px); min-width: 0; }
+.crow { display: grid; grid-template-columns: 84px minmax(0, 1fr) auto; gap: 4px 16px; align-items: center; padding: 14px 0; border-bottom: 1px solid var(--line); }
+.crow:last-child { border-bottom: 0; }
+.clabel { font: 500 11px/1.4 var(--font-mono); letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent); }
+.cval { font: 500 16px/1.4 var(--font-mono); color: var(--fg); text-decoration: none; overflow-wrap: anywhere; min-width: 0; }
+a.cval:hover { color: var(--accent); text-decoration: underline; text-underline-offset: 4px; }
+.cval.plain { font: 400 15px/1.5 var(--font-body); color: var(--fg-2); }
+.copy { background: none; border: 1px solid var(--line-2); color: var(--fg-2); font: 500 11px/1 var(--font-mono); letter-spacing: 0.1em; text-transform: uppercase; padding: 8px 10px; cursor: pointer; min-width: 74px; border-radius: 2px; }
+.copy:hover { color: var(--fg); border-color: var(--accent); }
+@media (max-width: 640px) {
+  .crow { grid-template-columns: minmax(0, 1fr) auto; }
+  .clabel { grid-column: 1 / -1; }
+}
+.site-footer { padding-block: 40px; }
+.foot { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 20px 32px; }
+.foot img { height: 64px; width: auto; }
+.foot p { color: var(--fg-2); font-size: 14px; max-width: 60ch; }
+
+@media (max-width: 860px) {
+  .hero-grid, .sec-head, .ai-grid, .orbit-grid, .budget-grid, .team-grid, .contact { grid-template-columns: minmax(0, 1fr); }
+  .hero-art { max-width: 380px; }
+  .explorer { grid-template-columns: minmax(0, 1fr); }
+  .bus { flex-direction: row; overflow-x: auto; padding-left: 0; gap: 8px; scrollbar-width: thin; padding-bottom: 6px; }
+  .bus::before, .bus button::before, .bus button::after { display: none; }
+  .bus button { width: auto; flex: 0 0 auto; border: 1px solid var(--line-2); padding: 10px 14px; font-size: 15px; }
+  .bus button .code { display: none; }
+  .bus button[aria-selected="true"] { border-color: var(--accent); background: var(--bg-2); }
+  .spec-strip { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .nav-row { flex-wrap: wrap; row-gap: 0; }
+  .nav { order: 3; width: 100%; padding-bottom: 6px; }
+}
+@media (max-width: 640px) {
+  .results { grid-template-columns: minmax(0, 1fr); }
+  .drives { grid-template-columns: minmax(0, 1fr); }
+  .brow { grid-template-columns: minmax(0, 1fr); gap: 6px; }
+  .axis { margin-left: 0; }
+  .out { font-size: 12px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+}
+</style>
+
+<header class="site-header">
+  <div class="wrap nav-row">
+    <a class="brand" href="#top" aria-label="QuanSat home">
+      <img src="assets/mark-small.png" alt="" width="40" height="28">
+      <span><span class="q">Quan</span><span class="s">Sat</span></span>
+    </a>
+    <nav class="nav" aria-label="Sections">
+      <a href="#mission">Mission</a>
+      <a href="#platform">Platform</a>
+      <a href="#edge-ai">Edge AI</a>
+      <a href="#orbit">Orbit</a>
+      <a href="#budget">Budget</a>
+      <a href="#team">Team</a>
+      <a href="#contact">Contact</a>
+    </nav>
+  </div>
+</header>
+
+<main id="top">
+  <section class="hero">
+    <div class="wrap">
+      <div class="hero-grid">
+        <div>
+          <p class="eyebrow">Quantron Team &middot; Cairo, Egypt</p>
+          <h1>A 1U CubeSat, designed by students in Cairo.</h1>
+          <p class="lede">QuanSat is a 10 &times; 10 &times; 10 cm satellite platform with eight subsystems and an on-board AI payload that decides which images are worth sending home.</p>
+          <div class="cta-row">
+            <a class="btn primary" href="#platform">Explore the platform</a>
+            <a class="btn" href="#orbit">See the orbit analysis</a>
+          </div>
+        </div>
+        <figure class="hero-art">
+          <svg viewBox="0 0 600 600" aria-hidden="true" focusable="false">
+            <circle cx="300" cy="300" r="270" fill="none" stroke="var(--line-2)" stroke-width="1.5" stroke-dasharray="2 8"/>
+            <circle cx="300" cy="300" r="200" fill="none" stroke="var(--line)" stroke-width="1.5"/>
+            <circle cx="300" cy="300" r="130" fill="none" stroke="var(--line)" stroke-width="1.5"/>
+            <circle r="6" fill="var(--accent)">
+              <animateMotion dur="32s" repeatCount="indefinite" path="M300,30 a270,270 0 1,1 0,540 a270,270 0 1,1 0,-540"/>
+            </circle>
+            <text class="svg-label" x="300" y="16" text-anchor="middle">LEO &middot; 500 KM</text>
+            <text class="svg-label" x="300" y="594" text-anchor="middle">SUN-SYNCHRONOUS &middot; 97.4&deg;</text>
+          </svg>
+          <img src="assets/mark.png" alt="The QuanSat mark: a cube with solar panels inside an orbit ring" width="900" height="624">
+        </figure>
+      </div>
+      <dl class="spec-strip">
+        <div class="spec"><dt>Form factor</dt><dd class="num">1U<small>10 &times; 10 &times; 10 cm</small></dd></div>
+        <div class="spec"><dt>Mass</dt><dd class="num">1&ndash;2 kg<small>Prototype may vary with materials</small></dd></div>
+        <div class="spec"><dt>Orbit</dt><dd class="num">500 km<small>Circular, 97.4&deg; inclination</small></dd></div>
+        <div class="spec"><dt>Cairo passes</dt><dd class="num">&asymp; 3 per day<small>308&ndash;431 s each</small></dd></div>
+      </dl>
+    </div>
+  </section>
+
+  <section class="section" id="mission">
+    <div class="wrap">
+      <div class="sec-head">
+        <div>
+          <p class="kicker">Mission</p>
+          <h2>A real satellite architecture that a university team can afford to build.</h2>
+        </div>
+        <div class="prose">
+          <p>CubeSats are made from standard 10 cm units. Their small size and low cost let universities test space technology that used to be out of reach.</p>
+          <p>QuanSat is a prototype that reproduces the core subsystems of a flight CubeSat: power, on-board computing, communication, payload, attitude control, thermal management and structure, plus a ground station. It is a platform for learning and research in satellite system design, with room to try intelligent power management and alternative communication methods.</p>
+          <p>The goal is a practical framework for the design problems small satellites raise, and a low-cost route into satellite research for teams with limited resources.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="platform">
+    <div class="wrap">
+      <div class="sec-head">
+        <div>
+          <p class="kicker">Platform</p>
+          <h2>Eight subsystems on one interface bus.</h2>
+        </div>
+        <div class="prose">
+          <p>Data, power and control run over a shared bus, so a new module can join the satellite without a redesign of the others. Select a subsystem to see what it does and what it is built from.</p>
+        </div>
+      </div>
+
+      <div class="explorer">
+        <div>
+          <p class="bus-label">Interface bus &middot; data / power / control</p>
+          <div class="bus" role="tablist" aria-label="Subsystems" aria-orientation="vertical">
+            <button role="tab" id="tab-eps" aria-controls="p-eps" aria-selected="true">Power <span class="code">EPS</span></button>
+            <button role="tab" id="tab-obc" aria-controls="p-obc" aria-selected="false" tabindex="-1">On-board computer <span class="code">OBC</span></button>
+            <button role="tab" id="tab-comms" aria-controls="p-comms" aria-selected="false" tabindex="-1">Communication <span class="code">COMMS</span></button>
+            <button role="tab" id="tab-payload" aria-controls="p-payload" aria-selected="false" tabindex="-1">Payload <span class="code">PL</span></button>
+            <button role="tab" id="tab-adcs" aria-controls="p-adcs" aria-selected="false" tabindex="-1">Attitude control <span class="code">ADCS</span></button>
+            <button role="tab" id="tab-thermal" aria-controls="p-thermal" aria-selected="false" tabindex="-1">Thermal control <span class="code">TCS</span></button>
+            <button role="tab" id="tab-struct" aria-controls="p-struct" aria-selected="false" tabindex="-1">Structure <span class="code">STR</span></button>
+            <button role="tab" id="tab-ground" aria-controls="p-ground" aria-selected="false" tabindex="-1">Ground station <span class="code">GS</span></button>
+          </div>
+        </div>
+
+        <div>
+          <article class="panel" role="tabpanel" id="p-eps" aria-labelledby="tab-eps">
+            <h3>Electrical power subsystem</h3>
+            <p class="role">Generates, stores, regulates and distributes power to every other subsystem.</p>
+            <div class="cols">
+              <div><h4>What it does</h4><ul>
+                <li>Harvests power from solar panels</li>
+                <li>Stores energy in rechargeable batteries</li>
+                <li>Regulates voltage levels</li>
+                <li>Protects against overcurrent, overvoltage and short circuits</li>
+              </ul></div>
+              <div><h4>Built from</h4><ul>
+                <li>Solar panels with power conditioning and MPPT charge control</li>
+                <li>Rechargeable battery pack with a battery management system</li>
+                <li>DC-DC converters and regulated power rails</li>
+                <li>Fault protection circuitry</li>
+              </ul></div>
+              <div><h4>What it monitors</h4><ul>
+                <li>Battery voltage and current</li>
+                <li>Charge level</li>
+                <li>Temperature</li>
+                <li>Power consumption per subsystem</li>
+              </ul></div>
+            </div>
+            <p class="meta"><span>Prototype budget <b class="num">13,500 EGP &middot; 18%</b></span></p>
+          </article>
+
+          <article class="panel" role="tabpanel" id="p-obc" aria-labelledby="tab-obc">
+            <h3>On-board computer</h3>
+            <p class="role">The central processing unit. It runs mission logic, routes commands and stores data.</p>
+            <div class="cols">
+              <div><h4>What it does</h4><ul>
+                <li>Executes mission logic</li>
+                <li>Processes sensor data</li>
+                <li>Manages communication between subsystems</li>
+                <li>Handles command execution</li>
+                <li>Stores telemetry and payload data</li>
+              </ul></div>
+              <div><h4>Built from</h4><ul>
+                <li>Raspberry Pi 5 (8 GB) and Raspberry Pi Pico H</li>
+                <li>Watchdog timer and real-time clock</li>
+                <li>Volatile and non-volatile memory, mass storage</li>
+                <li>Serial interfaces, digital I/O, analog inputs</li>
+              </ul></div>
+              <div><h4>Responsible for</h4><ul>
+                <li>Task scheduling</li>
+                <li>Health monitoring</li>
+                <li>Data logging</li>
+                <li>Error handling</li>
+                <li>Command routing</li>
+              </ul></div>
+            </div>
+            <p class="meta"><span>Prototype budget <b class="num">16,500 EGP &middot; 22%</b></span><span>Includes the edge AI hardware</span></p>
+          </article>
+
+          <article class="panel" role="tabpanel" id="p-comms" aria-labelledby="tab-comms">
+            <h3>Communication subsystem</h3>
+            <p class="role">A two-way radio link between the satellite and the ground station.</p>
+            <div class="cols">
+              <div><h4>What it does</h4><ul>
+                <li>Transmits telemetry</li>
+                <li>Receives control commands</li>
+                <li>Keeps the link reliable</li>
+                <li>Supports uplink and downlink</li>
+              </ul></div>
+              <div><h4>Built from</h4><ul>
+                <li>LoRa transceivers with separate transmit and receive paths, 433 MHz band planned</li>
+                <li>Antennas</li>
+                <li>Modulation, signal encoding, error detection and packet framing</li>
+              </ul></div>
+              <div><h4>Modes and data</h4><ul>
+                <li>Continuous telemetry, periodic beacon, command-response</li>
+                <li>Sends battery health, sensor readings, orientation, payload status and fault reports</li>
+              </ul></div>
+            </div>
+            <p class="meta"><span>Prototype budget <b class="num">9,000 EGP &middot; 12%</b></span></p>
+          </article>
+
+          <article class="panel" role="tabpanel" id="p-payload" aria-labelledby="tab-payload">
+            <h3>Payload subsystem</h3>
+            <p class="role">The mission-specific hardware that performs the satellite's primary objective. The baseline payload is the on-board edge AI camera described below.</p>
+            <div class="cols">
+              <div><h4>Possible payloads</h4><ul>
+                <li>Imaging</li>
+                <li>Environmental monitoring</li>
+                <li>Communication experiment</li>
+                <li>AI inference module</li>
+                <li>Scientific instrumentation</li>
+              </ul></div>
+              <div><h4>What it does</h4><ul>
+                <li>Acquires data</li>
+                <li>Processes signals</li>
+                <li>Stores data temporarily</li>
+                <li>Controls the payload</li>
+              </ul></div>
+              <div><h4>Interface</h4><ul>
+                <li>Modular payload connector</li>
+                <li>Independent power control</li>
+                <li>Data link to the OBC</li>
+              </ul></div>
+            </div>
+            <p class="meta"><span>Prototype budget <b>Counted in the OBC &amp; edge AI line</b></span></p>
+          </article>
+
+          <article class="panel" role="tabpanel" id="p-adcs" aria-labelledby="tab-adcs">
+            <h3>Attitude determination and control</h3>
+            <p class="role">Works out which way the satellite is pointing and corrects it.</p>
+            <div class="cols">
+              <div><h4>What it does</h4><ul>
+                <li>Detects orientation</li>
+                <li>Estimates attitude</li>
+                <li>Corrects orientation errors</li>
+                <li>Stabilizes the platform</li>
+              </ul></div>
+              <div><h4>Sensors and actuators</h4><ul>
+                <li>Inertial sensors (accelerometer, gyroscope) and a magnetometer</li>
+                <li>Sun sensors, optional star tracker</li>
+                <li>Reaction wheels, magnetorquers, motorized mechanisms</li>
+              </ul></div>
+              <div><h4>Outputs</h4><ul>
+                <li>Roll angle</li>
+                <li>Pitch angle</li>
+                <li>Yaw angle</li>
+                <li>Angular velocity</li>
+              </ul></div>
+            </div>
+            <p class="meta"><span>Prototype budget <b class="num">8,500 EGP &middot; 11.3%</b></span></p>
+          </article>
+
+          <article class="panel" role="tabpanel" id="p-thermal" aria-labelledby="tab-thermal">
+            <h3>Thermal control subsystem</h3>
+            <p class="role">Keeps the electronics and batteries inside safe operating temperatures.</p>
+            <div class="cols">
+              <div><h4>What it does</h4><ul>
+                <li>Monitors temperature</li>
+                <li>Prevents overheating</li>
+                <li>Reduces thermal stress</li>
+                <li>Protects batteries and electronics</li>
+              </ul></div>
+              <div><h4>Built from</h4><ul>
+                <li>Temperature sensors</li>
+                <li>Passive control: coatings, radiators, insulation</li>
+                <li>Optional active heating and cooling, with heaters as the actuator</li>
+              </ul></div>
+              <div><h4>Zones monitored</h4><ul>
+                <li>Battery section</li>
+                <li>Processor section</li>
+                <li>Payload section</li>
+              </ul></div>
+            </div>
+            <p class="meta"><span>Prototype budget <b class="num">8,000 EGP &middot; 10.7%</b></span><span>Shared with structure</span></p>
+          </article>
+
+          <article class="panel" role="tabpanel" id="p-struct" aria-labelledby="tab-struct">
+            <h3>Structural and mechanical subsystem</h3>
+            <p class="role">The frame that holds every subsystem and has to survive launch.</p>
+            <div class="cols">
+              <div><h4>What it does</h4><ul>
+                <li>Holds all subsystems securely</li>
+                <li>Resists external stress</li>
+                <li>Keeps internal alignment</li>
+              </ul></div>
+              <div><h4>Built from</h4><ul>
+                <li>Standard 1U CubeSat frame in aluminum; composite or reinforced 3D-printed polymer also considered</li>
+                <li>Internal mounting brackets and cable routing channels</li>
+                <li>Deployment-compatible design, with mechanisms for antenna and solar panels</li>
+              </ul></div>
+              <div><h4>Design requirements</h4><ul>
+                <li>Compact subsystem integration</li>
+                <li>Vibration tolerance</li>
+                <li>Thermal resistance</li>
+                <li>Easy access for maintenance and testing</li>
+              </ul></div>
+            </div>
+            <p class="meta"><span>Prototype budget <b class="num">8,000 EGP &middot; 10.7%</b></span><span>Shared with thermal control</span></p>
+          </article>
+
+          <article class="panel" role="tabpanel" id="p-ground" aria-labelledby="tab-ground">
+            <h3>Ground station</h3>
+            <p class="role">The external control centre. The orbit analysis places it in Cairo.</p>
+            <div class="cols">
+              <div><h4>What it does</h4><ul>
+                <li>Receives telemetry</li>
+                <li>Sends commands</li>
+                <li>Monitors mission status</li>
+                <li>Stores logs</li>
+              </ul></div>
+              <div><h4>Built from</h4><ul>
+                <li>LoRa module or SDR receiver</li>
+                <li>Directional antenna and cables</li>
+                <li>Ground station computer</li>
+                <li>Mission operations software</li>
+              </ul></div>
+              <div><h4>Software</h4><ul>
+                <li>Real-time telemetry visualization</li>
+                <li>Command interface</li>
+                <li>Logging system</li>
+                <li>Mission control panel</li>
+              </ul></div>
+            </div>
+            <p class="meta"><span>Prototype budget <b class="num">7,500 EGP &middot; 10%</b></span></p>
+          </article>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="edge-ai">
+    <div class="wrap">
+      <div class="sec-head">
+        <div>
+          <p class="kicker">On-board edge AI</p>
+          <h2>The satellite decides what is worth sending down.</h2>
+        </div>
+        <div class="prose">
+          <p>A lightweight model sits between the camera and the radio and judges every image in orbit. Cloudy and empty frames stay on board. Only a short result record, and the image itself when the model flags it, goes into the downlink queue.</p>
+          <p>That matters because a Cairo pass lasts only a few hundred seconds. The module draws power through the power subsystem and talks over the same bus as everything else, so it needs no redesign of the satellite.</p>
+        </div>
+      </div>
+
+      <div class="ai-grid">
+        <div>
+          <p class="sub-h">Data flow for each capture</p>
+          <ol class="flow">
+            <li><strong>Schedule</strong><span>The OBC schedules a capture and powers the payload.</span></li>
+            <li><strong>Capture and classify</strong><span>The camera takes an image and the model runs on it.</span></li>
+            <li><strong>Return a record</strong><span>The payload sends back class, confidence, time, position and a quality flag, then powers down.</span></li>
+            <li><strong>Store selectively</strong><span>The OBC keeps the record. It keeps the raw image only if it is flagged, or if a periodic random sample is due.</span></li>
+            <li><strong>Downlink in order</strong><span>On the next pass the radio sends records first, then flagged thumbnails if time remains.</span></li>
+            <li><strong>Ground can ask for more</strong><span>The ground station can command a raw image downlink for any record.</span></li>
+          </ol>
+        </div>
+
+        <div class="facts">
+          <div class="fact">
+            <h4>Use case</h4>
+            <p>Decide whether each image is usable and what it shows, such as cloudy or clear, land or water. A second, lighter task on the OBC flags anomalies in housekeeping telemetry instead of streaming every sample.</p>
+          </div>
+          <div class="fact">
+            <h4>Model</h4>
+            <p>A compact convolutional network of the MobileNet class, trained on public satellite image sets such as EuroSAT, quantized to INT8 and run with TensorFlow Lite.</p>
+          </div>
+          <div class="callout">
+            <p class="sub-h">Why the model is frozen before launch</p>
+            <p>At about 1 kbps, uplinking a 1 MB model takes roughly <b>2.3 hours</b> of continuous link, around <b>20 passes</b>. Only thresholds and class priorities are commanded from the ground.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <caption>Hardware options for the AI payload (baseline for the team to confirm)</caption>
+          <thead><tr><th scope="col">Option</th><th scope="col">Strength</th><th scope="col">Trade-off</th></tr></thead>
+          <tbody>
+            <tr>
+              <td>Raspberry Pi Zero 2 W class board<br><span class="tag">Develop here first</span></td>
+              <td>Camera port, Linux, TensorFlow Lite. Fastest to develop.</td>
+              <td>Highest power of the three. Commercial parts with no radiation heritage.</td>
+            </tr>
+            <tr>
+              <td>Microcontroller with tinyML<br><span class="tag alt">Port if power requires</span></td>
+              <td>Lowest power. Simple to isolate and reset.</td>
+              <td>Smaller models and lower image resolution.</td>
+            </tr>
+            <tr>
+              <td>Edge accelerator</td>
+              <td>Fastest inference.</td>
+              <td>Adds power, heat and mass.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="orbit">
+    <div class="wrap">
+      <div class="sec-head">
+        <div>
+          <p class="kicker">Mission analysis</p>
+          <h2>How often we can talk to the satellite, and how long it sits in shadow.</h2>
+        </div>
+        <div class="prose">
+          <p>We simulated the orbit in NASA's General Mission Analysis Tool (GMAT) with one spacecraft, a ground station in Cairo, a contact locator and an eclipse locator.</p>
+          <p>Two results drive the biggest design choices. Pass length sets the link budget, which is how much data fits in one pass. Eclipse length sets the power budget, which is how large the battery must be.</p>
+        </div>
+      </div>
+
+      <div class="orbit-grid">
+        <dl class="params">
+          <div><dt>Altitude</dt><dd class="num">500 km, circular</dd></div>
+          <div><dt>Inclination</dt><dd class="num">97.4&deg;</dd></div>
+          <div><dt>Orbit type</dt><dd>Sun-synchronous</dd></div>
+          <div><dt>Orbital period</dt><dd class="num">&asymp; 94.6 min</dd></div>
+          <div><dt>Ground station</dt><dd>Cairo</dd></div>
+          <div><dt>Simulation length</dt><dd>1 day</dd></div>
+        </dl>
+        <div class="results">
+          <div class="result"><div class="v num">&asymp; 3<small>passes / day</small></div><div class="l">Visible from the Cairo ground station</div></div>
+          <div class="result"><div class="v num">308&ndash;431<small>s</small></div><div class="l">Length of each pass</div></div>
+          <div class="result"><div class="v num">2,127<small>s</small></div><div class="l">Longest eclipse, about 35 minutes</div></div>
+        </div>
+      </div>
+
+      <div class="chart">
+        <h3>One orbit, drawn to scale</h3>
+        <p class="sub">The orbital period is calculated from the 500 km altitude. Eclipse and pass lengths come from the GMAT run.</p>
+        <div class="bars" role="img" aria-label="Bar chart on one time scale. One orbit lasts about 5,677 seconds. The longest eclipse is 2,127 seconds. A Cairo pass lasts 308 to 431 seconds.">
+          <div class="brow"><span class="lbl">One orbit</span><div class="track"><div class="seg orbit" style="width:100%">5,677 s</div></div></div>
+          <div class="brow"><span class="lbl">Longest eclipse</span><div class="track"><div class="seg eclipse" style="width:37.5%">2,127 s</div></div></div>
+          <div class="brow"><span class="lbl">Cairo pass</span><div class="track"><div class="seg pass" style="width:5.43%"></div><div class="seg pass-range" style="width:2.16%"></div><span class="out">308&ndash;431 s</span></div></div>
+        </div>
+        <div class="axis" aria-hidden="true">
+          <i style="left:0"></i><span style="left:0;transform:none">0</span>
+          <i style="left:17.6%"></i><span style="left:17.6%">1,000</span>
+          <i style="left:35.2%"></i><span style="left:35.2%">2,000</span>
+          <i style="left:52.8%"></i><span style="left:52.8%">3,000</span>
+          <i style="left:70.5%"></i><span style="left:70.5%">4,000</span>
+          <i style="left:88.1%"></i><span style="left:88.1%">5,000 s</span>
+        </div>
+
+        <div class="drives">
+          <div>
+            <h4>Pass length sets the data per pass</h4>
+            <p>At 1 kbps, the rate used in our uplink estimate, a 308 to 431 second pass carries roughly 38 to 54 kB. That is why the AI payload filters images before anything joins the downlink queue.</p>
+          </div>
+          <div>
+            <h4>Eclipse length sets the battery size</h4>
+            <p>During the longest shadow of about 35 minutes, the battery carries the whole satellite. The power subsystem is sized for that case.</p>
+          </div>
+        </div>
+        <p class="note">These figures come from a single one-day run. Eclipse length changes with the seasons, so the analysis will be repeated over a longer period.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="budget">
+    <div class="wrap">
+      <div class="budget-grid">
+        <div class="lead">
+          <p class="kicker">Prototype budget</p>
+          <p class="total num">75,000<small>EGP</small></p>
+          <p>The estimate for a complete 1U CubeSat prototype, based on local market pricing and the prototype requirements. Bars are drawn in proportion to cost.</p>
+        </div>
+        <ul class="blist">
+          <li><span class="n">On-board computer and edge AI</span><span class="i">Raspberry Pi 5, Raspberry Pi Pico H, storage, camera and cables</span><span class="a num">16,500 EGP<small>22%</small></span><span class="bar"><i style="width:100%"></i></span></li>
+          <li><span class="n">Electrical power</span><span class="i">Solar panels, rechargeable batteries, BMS, MPPT charge controllers and voltage regulators</span><span class="a num">13,500 EGP<small>18%</small></span><span class="bar"><i style="width:81.8%"></i></span></li>
+          <li><span class="n">Communication</span><span class="i">LoRa transceivers, high-gain antennas, modems and interface boards</span><span class="a num">9,000 EGP<small>12%</small></span><span class="bar"><i style="width:54.5%"></i></span></li>
+          <li><span class="n">Attitude determination and control</span><span class="i">IMU sensors, magnetometers, sun sensors and attitude-control actuators</span><span class="a num">8,500 EGP<small>11.3%</small></span><span class="bar"><i style="width:51.5%"></i></span></li>
+          <li><span class="n">Mechanical structure and thermal</span><span class="i">1U aluminum frame, mounting hardware, fasteners, heaters and thermal sensors</span><span class="a num">8,000 EGP<small>10.7%</small></span><span class="bar"><i style="width:48.5%"></i></span></li>
+          <li><span class="n">Ground station equipment</span><span class="i">LoRa or SDR receiver, directional antenna, cables and mounting equipment</span><span class="a num">7,500 EGP<small>10%</small></span><span class="bar"><i style="width:45.5%"></i></span></li>
+          <li><span class="n">Prototyping, PCB manufacturing and testing</span><span class="i">Custom multilayer PCBs, soldering, testing instruments and prototyping hardware</span><span class="a num">7,000 EGP<small>9.3%</small></span><span class="bar"><i style="width:42.4%"></i></span></li>
+          <li><span class="n">Emergency reserve and contingency</span><span class="i">Spare parts, component replacements, shipping and local taxes</span><span class="a num">5,000 EGP<small>6.7%</small></span><span class="bar"><i style="width:30.3%"></i></span></li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="team">
+    <div class="wrap">
+      <div class="sec-head">
+        <div>
+          <p class="kicker">Team</p>
+          <h2>Quantron, ten students in the Communication Department.</h2>
+        </div>
+      </div>
+      <div class="team-grid">
+        <div class="sup">
+          <p class="lbl">Project supervisor</p>
+          <p class="nm">Dr. Ahmed Shaker Hassan Mahmoud</p>
+          <p>Madina Higher Institute for Engineering and Technology, Communication Department.</p>
+        </div>
+        <ul class="members">
+          <li>AlHussein Ehab Mohammed Mohammed</li>
+          <li>Hossam Mohammed AbdAlNaby Hussein</li>
+          <li>Mohammed Salah Sayed Mohammed</li>
+          <li>Youssef Ismail Salama Ismail</li>
+          <li>Mohammed Eprahim Zakaryea Mohammed</li>
+          <li>Shams Zakaryea Galal ElSayed</li>
+          <li>Mohammed AlSaeed Omar Ali</li>
+          <li>Ahmed Khaled Sobhi AlKhouly</li>
+          <li>Ahmed Hany Hafez Mohammed</li>
+          <li>Omar Ashraf Fawzi AbdAlHameed</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="contact">
+    <div class="wrap">
+      <div class="contact">
+        <div>
+          <p class="kicker">Contact</p>
+          <h2>Talk to the team.</h2>
+          <p style="margin-top:20px">QuanSat is a student prototype in the design and simulation stage. If you work in RF, satellite testing, ground stations or components and want to help or compare notes, email or call the team.</p>
+        </div>
+        <div class="addr">
+          <div class="crow">
+            <span class="clabel">Email</span>
+            <a class="cval" href="mailto:QuanSatellite@hotmail.com">QuanSatellite@hotmail.com</a>
+            <button class="copy" type="button" data-copy="QuanSatellite@hotmail.com">Copy</button>
+          </div>
+          <div class="crow">
+            <span class="clabel">Phone</span>
+            <a class="cval num" href="tel:+201090227474">+20 10 9022 7474</a>
+            <button class="copy" type="button" data-copy="+201090227474">Copy</button>
+          </div>
+          <div class="crow">
+            <span class="clabel">Phone</span>
+            <a class="cval num" href="tel:+201152600469">+20 11 5260 0469</a>
+            <button class="copy" type="button" data-copy="+201152600469">Copy</button>
+          </div>
+          <div class="crow">
+            <span class="clabel">Phone</span>
+            <a class="cval num" href="tel:+201126397117">+20 11 2639 7117</a>
+            <button class="copy" type="button" data-copy="+201126397117">Copy</button>
+          </div>
+          <div class="crow">
+            <span class="clabel">Address</span>
+            <span class="cval plain">Quantron Team, Communication Department, Madina Higher Institute for Engineering and Technology, Cairo, Egypt</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap foot">
+    <img src="assets/logo-full.png" alt="QuanSat logo" width="760" height="543">
+    <p>QuanSat is a student engineering project by the Quantron Team. &copy; 2026 Quantron Team.</p>
+  </div>
+</footer>
+
+<script>
+(function () {
+  var tabs = Array.prototype.slice.call(document.querySelectorAll('.bus [role="tab"]'));
+  var panels = tabs.map(function (t) { return document.getElementById(t.getAttribute('aria-controls')); });
+  function select(i, focus) {
+    tabs.forEach(function (t, j) {
+      var on = i === j;
+      t.setAttribute('aria-selected', on ? 'true' : 'false');
+      t.tabIndex = on ? 0 : -1;
+      panels[j].hidden = !on;
+    });
+    if (focus) tabs[i].focus();
+  }
+  tabs.forEach(function (t, i) {
+    t.addEventListener('click', function () { select(i); });
+    t.addEventListener('keydown', function (e) {
+      var n = tabs.length, k = e.key;
+      if (k === 'ArrowDown' || k === 'ArrowRight') { e.preventDefault(); select((i + 1) % n, true); }
+      else if (k === 'ArrowUp' || k === 'ArrowLeft') { e.preventDefault(); select((i - 1 + n) % n, true); }
+      else if (k === 'Home') { e.preventDefault(); select(0, true); }
+      else if (k === 'End') { e.preventDefault(); select(n - 1, true); }
+    });
+  });
+  select(0);
+  Array.prototype.forEach.call(document.querySelectorAll('.copy'), function (btn) {
+    btn.addEventListener('click', function () {
+      var text = btn.getAttribute('data-copy');
+      var label = btn.textContent;
+      function done(msg) { btn.textContent = msg; setTimeout(function () { btn.textContent = label; }, 1600); }
+      function selectText() {
+        var target = btn.previousElementSibling;
+        try {
+          var r = document.createRange(); r.selectNodeContents(target);
+          var s = window.getSelection(); s.removeAllRanges(); s.addRange(r);
+        } catch (e) {}
+        done('Selected');
+      }
+      try {
+        navigator.clipboard.writeText(text).then(function () { done('Copied'); }, selectText);
+      } catch (e) { selectText(); }
+    });
+  });
+  if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    Array.prototype.forEach.call(document.querySelectorAll('animateMotion'), function (el) { el.parentNode.removeChild(el); });
+  }
+})();
+</script>
+
+</body></html>
